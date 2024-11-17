@@ -82,23 +82,78 @@ public class UsersManagerTest {
     @Test
     public void addPuntoInteresTest() {
 
-        this.um.añadirPuntoInteres("DOOR", 1, 2);
-        this.um.añadirPuntoInteres("WALL", 3, 4);
+        this.um.añadirPuntoInteres("DOOR", 1, 5);
+        this.um.añadirPuntoInteres("WALL", 9, 4);
         this.um.añadirPuntoInteres("incorrecto", 5, 6);
-        Assert.assertEquals(4, um.size());
+        Assert.assertEquals(4, um.sizePuntosInteres());
     }
 
     
     @Test
     public void ListarTipoPuntoInteresTest() {
-        this.um.añadirPuntoInteres("DOOR", 1, 2);
-        this.um.añadirPuntoInteres("WINDOW", 3, 4);
-        this.um.añadirPuntoInteres("DOOR", 5, 6);
+        this.um.añadirPuntoInteres("DOOR", 11, 2);
+        this.um.añadirPuntoInteres("WINDOW", 32, 4);
+        this.um.añadirPuntoInteres("DOOR", 5, 61);
 
         List<PuntosInteres> doors = this.um.ListarTipoPuntoInteres("DOOR");
         Assert.assertEquals(3, doors.size());
 
 
     }
+
+    @Test
+    public void RegistrarPuntoInteresTest() {
+        this.um.RegistrarPuntoInteres("11", 1, 2);
+        this.um.RegistrarPuntoInteres("12", 3, 4);
+        this.um.RegistrarPuntoInteres("12", 5, 6); //punto inexistente
+        this.um.RegistrarPuntoInteres("Maria", 7, 8); //tipo invalido de id
+
+        List<PuntosInteres> puntos = this.um.ConsultarPuntosDeUsuario("11");
+        Assert.assertEquals(1, puntos.size());
+
+        puntos = this.um.ConsultarPuntosDeUsuario("12");
+        Assert.assertEquals(1, puntos.size());
+
+        puntos = this.um.ConsultarPuntosDeUsuario("Maria");
+        Assert.assertEquals(0, puntos.size());
+
+    }
+
+    @Test
+    public void ConsultarUsuariosPuntoInteresTest() {
+        this.um.RegistrarPuntoInteres("11", 1, 2);
+        this.um.RegistrarPuntoInteres("12", 3, 4);
+        this.um.RegistrarPuntoInteres("12", 1, 2);
+        this.um.RegistrarPuntoInteres("11", 7, 8);
+
+
+        List<Usuario> users = this.um.ConsultarUsuariosPuntoInteres(1, 2);
+        Assert.assertEquals(2, users.size());
+
+        users = this.um.ConsultarUsuariosPuntoInteres(3, 4);
+        Assert.assertEquals(1, users.size());
+
+        users = this.um.ConsultarUsuariosPuntoInteres(7, 8);
+        Assert.assertEquals(0, users.size());
+
+    }
+
+    @Test
+    public void ConsultarPuntosUsuarioTest() {
+        this.um.RegistrarPuntoInteres("11", 1, 2);
+        this.um.RegistrarPuntoInteres("12", 3, 4);
+        this.um.RegistrarPuntoInteres("11", 5, 6);
+        this.um.RegistrarPuntoInteres("12", 1, 2);
+
+        List<PuntosInteres> puntos = this.um.ConsultarPuntosDeUsuario("11");
+        Assert.assertEquals(1, puntos.size());
+
+        puntos = this.um.ConsultarPuntosDeUsuario("12");
+        Assert.assertEquals(2, puntos.size());
+
+
+    }
+
+
 
 }

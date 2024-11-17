@@ -1,4 +1,5 @@
 package edu.upc.dsa.models;
+import java.util.ArrayList;
 import java.util.List;
 import edu.upc.dsa.models.Usuario;
 import edu.upc.dsa.util.RandomUtils;
@@ -19,6 +20,7 @@ public class PuntosInteres {
         this.type = type;
         this.x_coordenada = x_coordenada;
         this.y_coordenada = y_coordenada;
+        this.usuarios = new ArrayList<>();
     }
 
     public PuntosInteres(String id, String type, int x_coordenada, int y_coordenada) {

@@ -2,6 +2,7 @@ package edu.upc.dsa.services;
 
 import edu.upc.dsa.UsersManager;
 import edu.upc.dsa.UsersManagerImpl;
+import edu.upc.dsa.models.PuntosInteres;
 import edu.upc.dsa.models.Usuario;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,11 +25,21 @@ public class UsersService {
     public UsersService() {
         this.um = UsersManagerImpl.getInstance();
         if (um.size()==0) {
-            this.um.addUser("11", "Juan", "Fernandez", "e-mail", "01/01/1990");
-            this.um.addUser("12", "Pepe", "Garcia", "e-mail", "01/01/1990");
-            this.um.addUser("Maria", "Lopez", "e-mail", "01/01/1990");
-            this.um.añadirPuntoInteres("DOOR", 1, 2);
-            this.um.añadirPuntoInteres("WALL", 3, 4);
+            this.um.addUser("11", "Juan", "Fernandez", "juan@email.com", "01/01/1990");
+            this.um.addUser("12", "Pepe", "Garcia", "pepe@email.com", "02/02/1992");
+            this.um.addUser("13", "Maria", "Lopez", "maria@email.com", "03/03/1995");
+
+            // Añadir puntos de interés
+            PuntosInteres punto1 = this.um.añadirPuntoInteres("DOOR", 1, 2);
+            PuntosInteres punto2 = this.um.añadirPuntoInteres("WALL", 3, 4);
+            PuntosInteres punto3 = this.um.añadirPuntoInteres("PARK", 5, 6);
+            PuntosInteres punto4 = this.um.añadirPuntoInteres("LAKE", 7, 8);
+
+            // Asociar algunos puntos de interés con los usuarios
+            this.um.RegistrarPuntoInteres("11", 1, 2); // Juan ha visitado "DOOR"
+            this.um.RegistrarPuntoInteres("12", 3, 4); // Pepe ha visitado "WALL"
+            this.um.RegistrarPuntoInteres("12", 5, 6); // Pepe ha visitado "PARK"
+            this.um.RegistrarPuntoInteres("13", 7, 8); // Maria ha visitado "LAKE"
 
         }
 
@@ -40,7 +51,7 @@ public class UsersService {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful", response = Usuario.class, responseContainer="List"),
     })
-    @Path("/")
+
     @Produces(MediaType.APPLICATION_JSON)
     public Response ListarOrdenAlfabetico() {
 
@@ -73,9 +84,10 @@ public class UsersService {
             @ApiResponse(code = 201, message = "Successful"),
             @ApiResponse(code = 404, message = "User not found")
     })
-    @Path("/")
-    public Response RegistrarPuntoInteres(String id, int x, int y) {
-
+    @Path("/añadirPuntoInteres/{id}/{x}/{y}")
+    public Response RegistrarPuntoInteres(@PathParam("id") String id,
+                                          @PathParam("x") int x,
+                                          @PathParam("y") int y) {
         Usuario u = this.um.RegistrarPuntoInteres(id, x, y);
 
         if (u == null) return Response.status(404).build();
@@ -89,10 +101,10 @@ public class UsersService {
             @ApiResponse(code = 201, message = "Successful"),
             @ApiResponse(code = 404, message = "User not found")
     })
-    @Path("/")
-    public Response AñadirUsuario(String nombre, String apellido, String email, String fecha) {
+    @Path("/add")
+    public Response AñadirUsuario(Usuario usuario) {
 
-        Usuario u = this.um.addUser(nombre, apellido, email, fecha);
+        Usuario u = this.um.addUser(usuario.getNombre(), usuario.getApellidos(), usuario.getCorreo(), usuario.getFecha_nacimiento());
 
         if (u == null) return Response.status(404).build();
 

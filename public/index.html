@@ -1,3 +1,258 @@
-<h1>Hello</h1>
-<p>World</p>
-<img src="espinete.jpg">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios y Puntos de Interés</title>
+    <div>
+        <h2>Listar Puntos de Interés por Tipo</h2>
+        <label for="tipo-puntos">Tipo de Punto de Interés:</label>
+        <input type="text" id="tipo-puntos"><br>
+        <button onclick="listarPuntosPorTipo()">Listar Puntos</button>
+    </div>
+    <script>
+        // Función para listar los usuarios en orden alfabético
+        function listarUsuarios() {
+            fetch('http://localhost:8080/dsaApp/users')
+                .then(response => response.json())
+                .then(data => {
+                    let output = "<h3>Lista de Usuarios</h3><ul>";
+                    data.forEach(user => {
+                        output += `<li>${user.nombre} ${user.apellidos} (ID: ${user.id})</li>`;
+                    });
+                    output += "</ul>";
+                    document.getElementById('result').innerHTML = output;
+                })
+                .catch(error => console.error("Error al listar usuarios:", error));
+        }
+
+        // Función para listar puntos de interés por tipo
+    function listarPuntosPorTipo() {
+        const tipo = document.getElementById('tipo-puntos').value;
+
+        fetch(`http://localhost:8080/dsaApp/puntosinteres/listarPuntos/${tipo}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al consultar los puntos de interés');
+                }
+                return response.json();
+            })
+            .then(data => {
+                let output = `<h3>Puntos de Interés del tipo "${tipo}":</h3><ul>`;
+                data.forEach(punto => {
+                    output += `<li>Coordenadas: (${punto.x_coordenada}, ${punto.y_coordenada}), ID: ${punto.id}</li>`;
+                });
+                output += "</ul>";
+                document.getElementById('result').innerHTML = output;
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML = "No se pudieron obtener los puntos de interés.";
+                console.error("Error al listar puntos de interés por tipo:", error);
+            });
+    }
+
+        // Función para obtener un usuario por ID
+        function obtenerUsuarioPorId() {
+            const userId = document.getElementById('usuario-id').value;
+            fetch(`http://localhost:8080/dsaApp/users/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let output = `<h3>Detalles del Usuario (ID: ${data.id})</h3>`;
+                    output += `Nombre: ${data.nombre} ${data.apellidos}<br>`;
+                    output += `Correo: ${data.correo}<br>`;
+                    output += `Fecha de Nacimiento: ${data.fecha_nacimiento}<br>`;
+                    document.getElementById('result').innerHTML = output;
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = "Usuario no encontrado.";
+                    console.error("Error al obtener usuario:", error);
+                });
+        }
+
+        // Función para añadir un nuevo usuario
+        function añadirUsuario() {
+            const nombre = document.getElementById('nombre').value;
+            const apellidos = document.getElementById('apellidos').value;
+            const correo = document.getElementById('correo').value;
+            const fechaNacimiento = document.getElementById('fecha-nacimiento').value;
+
+            const usuario = {
+                nombre: nombre,
+                apellidos: apellidos,
+                correo: correo,
+                fecha_nacimiento: fechaNacimiento
+            };
+
+            fetch('http://localhost:8080/dsaApp/users/add', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(usuario)
+            })
+            .then(response => {
+                if (response.status === 201) {
+                    alert("Usuario añadido exitosamente.");
+                } else {
+                    alert("Error al añadir usuario.");
+                }
+            })
+            .catch(error => console.error("Error al añadir usuario:", error));
+        }
+
+        // Función para añadir un punto de interés
+        function añadirPuntoInteres() {
+            const type = document.getElementById('punto-type').value;
+            const x = document.getElementById('punto-x').value;
+            const y = document.getElementById('punto-y').value;
+
+            const puntoInteres = {
+                type: type,
+                x_coordenada: parseInt(x),
+                y_coordenada: parseInt(y)
+            };
+
+            fetch('http://localhost:8080/dsaApp/puntosinteres/añadirPuntosInteres', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(puntoInteres)
+            })
+            .then(response => {
+                if (response.status === 201) {
+                    alert("Punto de interés añadido exitosamente.");
+                } else {
+                    alert("Error al añadir el punto de interés.");
+                }
+            })
+            .catch(error => console.error("Error al añadir punto de interés:", error));
+        }
+
+        // Función para consultar los usuarios que han visitado un punto de interés
+        function consultarUsuariosDePunto() {
+    const x = document.getElementById('consultar-x').value;
+    const y = document.getElementById('consultar-y').value;
+
+    fetch(`http://localhost:8080/dsaApp/puntosinteres/consultarUsuariosDePuntos?x=${x}&y=${y}`)
+        .then(response => response.json())
+        .then(data => {
+            let output = "<h3>Usuarios que han visitado el punto de interés:</h3><ul>";
+            data.forEach(user => {
+                output += `<li>${user.nombre} ${user.apellidos} (ID: ${user.id})</li>`;
+            });
+            output += "</ul>";
+            document.getElementById('result').innerHTML = output;
+        })
+        .catch(error => console.error("Error al consultar usuarios de punto:", error));
+}
+
+
+        // Función para consultar los puntos de interés visitados por un usuario
+        function consultarPuntosDeUsuario() {
+            const userId = document.getElementById('usuario-id-puntos').value;
+            fetch(`http://localhost:8080/dsaApp/puntosinteres/consultarPuntosdeUsuario?id=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let output = "<h3>Puntos de interés visitados:</h3><ul>";
+                    data.forEach(punto => {
+                        output += `<li>Tipo: ${punto.type}, Coordenadas: (${punto.x_coordenada}, ${punto.y_coordenada})</li>`;
+                    });
+                    output += "</ul>";
+                    document.getElementById('result').innerHTML = output;
+                })
+                .catch(error => console.error("Error al consultar puntos de usuario:", error));
+        }
+
+        // Función para registrar que un usuario ha visitado un punto de interés
+        function registrarPuntoDeInteres() {
+            const userId = document.getElementById('usuario-id-visita').value;
+            const x = document.getElementById('x-coord-visita').value;
+            const y = document.getElementById('y-coord-visita').value;
+
+            fetch(`http://localhost:8080/dsaApp/users/añadirPuntoInteres/${userId}/${x}/${y}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.status === 201) {
+                    alert("Punto de interés registrado para el usuario.");
+                } else {
+                    alert("Error al registrar el punto.");
+                }
+            })
+            .catch(error => console.error("Error al registrar el punto:", error));
+        }
+    </script>
+</head>
+<body>
+<h1>Gestión de Usuarios y Puntos de Interés</h1>
+
+<div>
+    <h2>Listar Usuarios</h2>
+    <button onclick="listarUsuarios()">Listar Usuarios</button>
+</div>
+
+<div>
+    <h2>Obtener Usuario por ID</h2>
+    <label for="usuario-id">ID de Usuario:</label>
+    <input type="text" id="usuario-id">
+    <button onclick="obtenerUsuarioPorId()">Obtener Usuario</button>
+</div>
+
+<div>
+    <h2>Añadir Nuevo Usuario</h2>
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre"><br>
+    <label for="apellidos">Apellidos:</label>
+    <input type="text" id="apellidos"><br>
+    <label for="correo">Correo:</label>
+    <input type="email" id="correo"><br>
+    <label for="fecha-nacimiento">Fecha de Nacimiento:</label>
+    <input type="date" id="fecha-nacimiento"><br>
+    <button onclick="añadirUsuario()">Añadir Usuario</button>
+</div>
+
+<div>
+    <h2>Añadir Punto de Interés</h2>
+    <label for="punto-type">Tipo de Punto:</label>
+    <input type="text" id="punto-type"><br>
+    <label for="punto-x">Coordenada X:</label>
+    <input type="number" id="punto-x"><br>
+    <label for="punto-y">Coordenada Y:</label>
+    <input type="number" id="punto-y"><br>
+    <button onclick="añadirPuntoInteres()">Añadir Punto</button>
+</div>
+
+<div>
+    <h2>Consultar Usuarios que han Visitado un Punto</h2>
+    <label for="consultar-x">Coordenada X:</label>
+    <input type="number" id="consultar-x"><br>
+    <label for="consultar-y">Coordenada Y:</label>
+    <input type="number" id="consultar-y"><br>
+    <button onclick="consultarUsuariosDePunto()">Consultar Usuarios</button>
+</div>
+
+<div>
+    <h2>Consultar Puntos de Interés de un Usuario</h2>
+    <label for="usuario-id-puntos">ID de Usuario:</label>
+    <input type="text" id="usuario-id-puntos"><br>
+    <button onclick="consultarPuntosDeUsuario()">Consultar Puntos</button>
+</div>
+
+<div>
+    <h2>Registrar Visita de un Usuario a un Punto de Interés</h2>
+    <label for="usuario-id-visita">ID de Usuario:</label>
+    <input type="text" id="usuario-id-visita"><br>
+    <label for="x-coord-visita">Coordenada X:</label>
+    <input type="number" id="x-coord-visita"><br>
+    <label for="y-coord-visita">Coordenada Y:</label>
+    <input type="number" id="y-coord-visita"><br>
+    <button onclick="registrarPuntoDeInteres()">Registrar Visita</button>
+</div>
+
+<div id="result"></div>
+</body>
+</html>

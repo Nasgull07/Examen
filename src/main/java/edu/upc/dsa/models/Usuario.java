@@ -2,6 +2,8 @@ package edu.upc.dsa.models;
 import edu.upc.dsa.models.PuntosInteres;
 import edu.upc.dsa.util.RandomUtils;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Usuario {
@@ -29,6 +31,9 @@ public class Usuario {
     }
 
     public List<PuntosInteres> getPuntosInteres() {
+        if (this.puntosInteres == null) {
+            this.puntosInteres = new LinkedList<>();  // Inicializa la lista si es null
+        }
         return puntosInteres;
     }
 
@@ -44,6 +49,9 @@ public class Usuario {
     }
 
     public void setPuntoInteres(PuntosInteres puntoInteres) {
+        if (this.puntosInteres == null) {
+            this.puntosInteres = new ArrayList<>();
+        }
         this.puntosInteres.add(puntoInteres);
     }
 

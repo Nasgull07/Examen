@@ -3,6 +3,7 @@ package edu.upc.dsa;
 import edu.upc.dsa.models.Usuario;
 import edu.upc.dsa.models.PuntosInteres;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -16,6 +17,18 @@ public class UsersManagerImpl implements  UsersManager {
     private UsersManagerImpl() {
         this.usuarios = new LinkedList<>();
         this.puntosInteres = new LinkedList<>();
+    }
+    public enum PointType {
+        DOOR, WALL, BRIDGE, POTION, SWORD, COIN, GRASS, TREE;
+
+        public static boolean isValid(String type) {
+            try {
+                PointType.valueOf(type);
+                return true;
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        }
     }
 
     public static UsersManager getInstance() {
@@ -43,16 +56,6 @@ public class UsersManagerImpl implements  UsersManager {
         logger.info("User added: " + u);
     }
 
-    public Usuario getUser(String id) {
-        for (Usuario u : this.usuarios) {
-            if (u.getId().equals(id)) {
-                logger.info("User found: " + u);
-                return u;
-            }
-        }
-        logger.warn("User not found: " + id);
-        return null;
-    }
 
     public List<Usuario> ListarOrdenAlfabetico() {
         this.usuarios.sort((u1, u2) -> {
@@ -65,10 +68,19 @@ public class UsersManagerImpl implements  UsersManager {
         return this.usuarios;
     }
 
+    public Usuario getUser(String id) {
+        for (Usuario u : this.usuarios) {
+            if (u.getId().equals(id)) {
+                logger.info("User found: " + u);
+                return u;
+            }
+        }
+        logger.warn("User not found: " + id);
+        return null;
+    }
 
     public PuntosInteres añadirPuntoInteres(String type, int x_coordenada, int y_coordenada) {
-        List<String> validTypes = List.of("DOOR", "WALL", "BRIDGE", "POTION", "SWORD", "COIN", "GRASS", "TREE");
-        if (!validTypes.contains(type)) {
+        if (!PointType.isValid(type)) {
             logger.warn("Invalid point of interest type: " + type);
             return null;
         }
@@ -104,17 +116,25 @@ public class UsersManagerImpl implements  UsersManager {
         return u;
     }
 
-    public List<PuntosInteres> ConsultarPuntoInteres(String id) {
-        Usuario u = this.getUser(id);
-        if (u != null) {
-            return u.getPuntosInteres();
+    public List<PuntosInteres> ConsultarPuntosDeUsuario(String id) {
+        List<PuntosInteres> puntosDeUsuario = new ArrayList<>();
+
+
+            for (Usuario usuario : this.usuarios) {
+                if (usuario.getId().equals(id)) {
+                    puntosDeUsuario = usuario.getPuntosInteres();
+                    break;
+                }
+            }
+            if (puntosDeUsuario != null) {
+            return puntosDeUsuario;
         } else {
             logger.warn("User not found: " + id);
             return new LinkedList<>();
         }
     }
 
-    public List<Usuario> ConsultarUsuariosPuntoInteres(Integer x, Integer y) {
+    public List<Usuario> ConsultarUsuariosPuntoInteres(int x, int y) {
         List<Usuario> result = new LinkedList<>();
         boolean puntoInteresEncontrado = false;
         for (Usuario u : this.usuarios) {
@@ -132,11 +152,11 @@ public class UsersManagerImpl implements  UsersManager {
         return result;
     }
 
+
     public List<PuntosInteres> ListarTipoPuntoInteres(String type) {
-        List<String> validTypes = List.of("DOOR", "WALL", "BRIDGE", "POTION", "SWORD", "COIN", "GRASS", "TREE");
-        if (!validTypes.contains(type)) {
+        if (!PointType.isValid(type)) {
             logger.warn("Invalid point of interest type: " + type);
-            return new LinkedList<>();
+            return null;
         }
         List<PuntosInteres> result = new LinkedList<>();
         for (PuntosInteres p : this.puntosInteres) {
@@ -156,5 +176,7 @@ public class UsersManagerImpl implements  UsersManager {
     public int size() {
         return this.usuarios.size();
     }
-
+    public int sizePuntosInteres() {
+        return this.puntosInteres.size();
+    }
 }
